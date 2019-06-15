@@ -1,0 +1,104 @@
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chaos Atrractor</title>
+</head>
+
+<body onload="init()" onresize="init()">
+    <section>
+        <!-- ページタイトル -->
+        <h1>ローレンツアトラクタ</h1>
+        <div>
+            <!-- 初期パラメータ設定とか -->
+            <!-- スタートボタン -->
+            <!-- <button id="start">スタート</button> -->
+            <!-- ストップボタン -->
+            <!-- <button id="pause">ストップ</button> -->
+
+            <!-- (優先低め)2dと3dの切り替え -->
+
+        </div>
+        <!-- <canvas id="drowarea" width="700" height="500" style="border:2px solid white;"></canvas> -->
+        <canvas id="drowarea" style="border:2px solid black;"></canvas>
+    </section>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script>
+        // 以下に描画処理を書いていく
+        const POINT_R = 1;
+        const TIME_INTERVAL_MS = 0.1;
+        var points = new Array();
+        var ctx;
+        var canvas;
+        var intervalID;
+
+        // 式係数（あとで入力にした値にする）
+        var p = 10;
+        // var p = Math.floor(Math.random() * 10) + 10;
+        var r = 28;
+        var b = 8.0 / 3.0;
+
+        // サンプリング周期
+        var dt = 0.003;
+
+        function RPoint(x, y, z) {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+        RPoint.prototype.update = function() {
+            // ローレンツ方程式
+            var dx = -p * this.x + p * this.y;
+            var dy = -this.x * this.z + r * this.x - this.y;
+            var dz = this.x * this.y - b * this.z;
+            // console.log(dx, dy, dz);
+
+            // 微分係数
+            this.x += dx * dt;
+            this.y += dy * dt;
+            this.z += dz * dt;
+            // console.log(this.x, this.y, this.z);
+        }
+
+        function drawItem() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (var i = 0; i < points.length; i++) {
+                rpoint = points[i];
+                rpoint.update();
+                // console.log(rpoint.x, rpoint.y);
+
+                ctx.beginPath();
+                var sx = rpoint.x * 12 + canvas.width / 2;
+                var sy = rpoint.y * 12 + canvas.height / 2;
+                ctx.arc(sx, sy, POINT_R * 2, 0, Math.PI * 2, true);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            console.log(p);
+            for (var i = 0; i < 2000; i++) {
+                points.push(new RPoint(1, 1, 1 + i * 0.001));
+            }
+            canvas = document.getElementById("drowarea");
+            canvas.width = window.innerWidth;;
+            canvas.height = window.innerHeight;
+
+            if (canvas.getContext) {
+                ctx = canvas.getContext('2d');
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 1.0)';
+                ctx.fillStyle = 'rgba(0, 0, 0, 1.0)';
+
+                if (intervalID) clearInterval(intervalID);
+                intervalID = setInterval(drawItem, TIME_INTERVAL_MS);
+            }
+        }
+    </script>
+</body>
+
+</html>
